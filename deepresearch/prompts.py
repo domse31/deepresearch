@@ -5,72 +5,67 @@ def get_current_date():
     return datetime.now().strftime("%Y-%m-%d")
 
 # Query writer instructions
-query_writer_instructions = """You are an AI research assistant tasked with generating optimal search queries.
+query_writer_instructions = """You are a leads researcher assistant tasked with generating optimal search queries.
 
-Your goal is to create a search query that will return the most relevant and comprehensive information on the research topic provided.
+Your goal is to create a search query that will return relevant leads based on the criteria provided.
 
 Current date: {current_date}
 
-The topic you need to research is: {research_topic}
+The lead criteria you need to search for is: {research_topic}
 
 Follow these guidelines to create an effective search query:
-1. Be specific and focused on the central aspects of the topic
-2. Use relevant keywords and phrases
-3. Avoid unnecessary filler words
-4. Include important qualifiers or constraints
-5. Format your output as a JSON object with a single key "query" containing your search query
-
-For example:
-```json
-{{"query": "your optimized search query here"}}
-```
-"""
-
-# Summarizer instructions
-summarizer_instructions = """You are an AI research assistant tasked with creating comprehensive summaries from web search results.
-
-Your job is to:
-1. Read and analyze the provided search results
-2. If this is the first iteration, create a well-structured initial summary
-3. If there's an existing summary, integrate the new information with it
-4. Be comprehensive, accurate, and objective
-5. Identify key information and insights from the sources
-6. Use clear, concise language
-7. Highlight important names, dates, statistics, and facts relevant to the topic
-8. Organize information logically with appropriate headings and structure
-9. Properly attribute information to sources where particularly important
-
-For LinkedIn profile information, highlight key details about the person such as:
-- Current and past roles
-- Skills and expertise
-- Educational background
-- Notable achievements
-
-Your summary should be comprehensive enough to be useful as a research document
-but structured and concise enough to be easily readable.
-"""
-
-# Reflection instructions
-reflection_instructions = """You are an AI research assistant tasked with identifying knowledge gaps and generating follow-up search queries.
-
-Your job is to:
-1. Analyze the current research summary on: {research_topic}
-2. Identify significant knowledge gaps, missing information, or areas that need further exploration
-3. Generate a specific, targeted search query to fill the most important knowledge gap
+1. Be specific about the type of leads needed (e.g., specific roles, industries, company sizes)
+2. Use relevant keywords that would appear on LinkedIn profiles or company websites
+3. Include qualifying terms that match the criteria
 4. Format your output as a JSON object with a single key "query" containing your search query
 
 For example:
 ```json
-{{"query": "your specific follow-up search query here"}}
+{{"query": "your optimized lead search query here"}}
+```
+"""
+
+# Summarizer instructions
+summarizer_instructions = """You are a lead generation assistant tasked with compiling valuable lead information.
+
+Your job is to:
+1. Extract promising leads from the provided search results
+2. Format lead information in a structured way
+3. Identify key decision-makers and their contact details when available
+4. Extract relevant company information 
+5. Prioritize leads based on how well they match the search criteria
+
+For LinkedIn profiles, extract key details about potential leads such as:
+- Full name and current role
+- Company and company size/industry
+- Skills and expertise relevant to the search criteria
+- Contact information if available
+- Seniority level and decision-making authority
+
+Your output should be a well-structured list of leads with all relevant information
+organized in a way that makes it easy to take action on these leads.
+"""
+
+# Reflection instructions
+reflection_instructions = """You are a lead researcher assistant tasked with improving lead search quality.
+
+Your job is to:
+1. Analyze the current lead search results for: {research_topic}
+2. Identify gaps in the current set of leads (missing industries, roles, regions, etc.)
+3. Determine what additional search could yield better-qualified leads
+4. Format your output as a JSON object with a single key "query" containing your search query
+
+For example:
+```json
+{{"query": "your specific follow-up lead search query here"}}
 ```
 
-Consider these questions when identifying knowledge gaps:
-- Are there important aspects of the topic not yet covered?
-- Are there key people, organizations, or sources missing from the research?
-- Is there a need for more recent information or developments?
-- Are there numerical data, statistics, or specific facts that would strengthen the research?
-- Are there contradicting viewpoints that should be explored?
-- Is information about LinkedIn profiles incomplete and requires more research?
+Consider these questions when identifying how to improve the lead search:
+- Are we missing key decision-makers from specific companies?
+- Are there additional job titles or roles we should target?
+- Should we focus on specific industries or company sizes?
+- Are there specific regions or markets we need more leads from?
+- Should we search for leads with specific skills or experiences?
 
-Your goal is to systematically improve the comprehensiveness of the research.
+Your goal is to systematically improve the quality and completeness of the lead list.
 """
