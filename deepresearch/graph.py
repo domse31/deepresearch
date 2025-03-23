@@ -43,13 +43,13 @@ if os.getenv("LANGSMITH_API_KEY") and os.getenv("LANGSMITH_PROJECT"):
 
 # Nodes
 def generate_query(state, config: RunnableConfig):
-    """LangGraph node that generates a search query based on the research topic.
+    """LangGraph node that generates a search query based on the lead criteria.
     
-    Uses OpenAI to create an optimized search query for web research based on
-    the user's research topic.
+    Uses OpenAI to create an optimized search query for finding leads based on
+    the user's specified criteria.
     
     Args:
-        state: Current graph state containing the research topic
+        state: Current graph state containing the lead criteria
         config: Configuration for the runnable, including model settings
         
     Returns:
@@ -74,7 +74,7 @@ def generate_query(state, config: RunnableConfig):
     
     result = llm_json_mode.invoke(
         [SystemMessage(content=formatted_prompt),
-        HumanMessage(content=f"Generate a query for web search:")]
+        HumanMessage(content=f"Generate a query to find leads matching these criteria:")]
     )
     
     # Get the content
@@ -90,7 +90,7 @@ def generate_query(state, config: RunnableConfig):
     return {"search_query": search_query}
 
 def web_research(state, config: RunnableConfig):
-    """LangGraph node that performs web research using the generated search query.
+    """LangGraph node that searches for leads using the generated search query.
     
     Executes a web search using Tavily and formats the results for further processing.
     Also extracts and processes any LinkedIn profile URLs found in the results.
@@ -110,7 +110,7 @@ def web_research(state, config: RunnableConfig):
     # Ensure we have a search query
     search_query = state.get("search_query", "")
     if not search_query:
-        search_query = f"research about {state.get('research_topic', 'AI research')}"
+        search_query = f"leads for {state.get('research_topic', 'sales leads')}"
     
     # Get current research loop count with default
     research_loop_count = state.get("research_loop_count", 0)
@@ -149,27 +149,25 @@ def web_research(state, config: RunnableConfig):
         "linkedin_profiles": linkedin_profiles
     }
 
-def summarize_sources(state, config: RunnableConfig):
-    """LangGraph node that summarizes web research results.
+def summarize_leads(state, config: RunnableConfig):
+    """LangGraph node that processes and summarizes lead information.
     
-    Uses an LLM to create or update a running summary based on the newest web research 
-    results, integrating them with any existing summary. Also includes LinkedIn profile
-    information when available.
+    Uses an LLM to compile lead information from web research results and LinkedIn profiles,
+    organizing it into a structured list of leads.
     
     Args:
-        state: Current graph state containing research topic, running summary,
-              web research results, and linkedin_profiles
+        state: Current graph state containing lead criteria, web research results, and LinkedIn profiles
         config: Configuration for the runnable, including LLM provider settings
         
     Returns:
-        Dictionary with state update, including running_summary key containing the updated summary
+        Dictionary with state update, including running_summary key containing the structured leads
     """
 
     # Existing summary with default
     existing_summary = state.get("running_summary", "")
 
-    # Get research topic with default
-    research_topic = state.get("research_topic", "AI research")
+    # Get lead criteria with default
+    research_topic = state.get("research_topic", "sales leads")
 
     # Most recent web research with default
     web_research_results = state.get("web_research_results", [])
@@ -200,15 +198,15 @@ def summarize_sources(state, config: RunnableConfig):
     # Build the human message
     if existing_summary:
         human_message_content = (
-            f"<User Input> \n {research_topic} \n </User Input>\n\n"
-            f"<Existing Summary> \n {existing_summary} \n </Existing Summary>\n\n"
+            f"<Lead Criteria> \n {research_topic} \n </Lead Criteria>\n\n"
+            f"<Existing Leads> \n {existing_summary} \n </Existing Leads>\n\n"
             f"<New Search Results> \n {most_recent_web_research} \n </New Search Results>"
         )
         if linkedin_info:
             human_message_content += f"\n\n{linkedin_info}"
     else:
         human_message_content = (
-            f"<User Input> \n {research_topic} \n </User Input>\n\n"
+            f"<Lead Criteria> \n {research_topic} \n </Lead Criteria>\n\n"
             f"<Search Results> \n {most_recent_web_research} \n </Search Results>"
         )
         if linkedin_info:
@@ -231,15 +229,14 @@ def summarize_sources(state, config: RunnableConfig):
 
     return {"running_summary": running_summary}
 
-def reflect_on_summary(state, config: RunnableConfig):
-    """LangGraph node that identifies knowledge gaps and generates follow-up queries.
+def reflect_on_leads(state, config: RunnableConfig):
+    """LangGraph node that identifies gaps in the current lead collection.
     
-    Analyzes the current summary to identify areas for further research and generates
-    a new search query to address those gaps. Uses structured output to extract
-    the follow-up query in JSON format.
+    Analyzes the current leads to identify missing types of leads or areas for
+    further lead search. Uses structured output to extract the follow-up query in JSON format.
     
     Args:
-        state: Current graph state containing the running summary and research topic
+        state: Current graph state containing the running summary and lead criteria
         config: Configuration for the runnable, including LLM provider settings
         
     Returns:
@@ -247,8 +244,8 @@ def reflect_on_summary(state, config: RunnableConfig):
     """
 
     # Get state values with defaults
-    research_topic = state.get("research_topic", "AI research")
-    running_summary = state.get("running_summary", "No summary available yet.")
+    research_topic = state.get("research_topic", "sales leads")
+    running_summary = state.get("running_summary", "No leads available yet.")
 
     # Generate a query
     configurable = Configuration.from_runnable_config(config)
@@ -261,7 +258,7 @@ def reflect_on_summary(state, config: RunnableConfig):
     
     result = llm_json_mode.invoke(
         [SystemMessage(content=reflection_instructions.format(research_topic=research_topic)),
-        HumanMessage(content=f"Reflect on our existing knowledge: \n === \n {running_summary}, \n === \n And now identify a knowledge gap and generate a follow-up web search query:")]
+        HumanMessage(content=f"Reflect on our existing leads: \n === \n {running_summary}, \n === \n And now identify missing lead types and generate a follow-up search query:")]
     )
     
     # Get the content
@@ -277,21 +274,21 @@ def reflect_on_summary(state, config: RunnableConfig):
     
     return {"search_query": search_query}
 
-def finalize_summary(state):
-    """LangGraph node that finalizes the research summary.
+def finalize_leads(state):
+    """LangGraph node that finalizes the lead collection.
     
     Prepares the final output by formatting the running summary with LinkedIn profiles
-    and other sources for a comprehensive research report.
+    and other sources to create a comprehensive lead list.
     
     Args:
         state: Current graph state containing the running summary, sources gathered, and linkedin_profiles
         
     Returns:
-        Dictionary with state update, including running_summary key containing the formatted final summary
+        Dictionary with state update, including running_summary key containing the formatted final leads
     """
 
     # Get values with defaults
-    running_summary = state.get("running_summary", "No summary available.")
+    running_summary = state.get("running_summary", "No leads available.")
     sources_gathered = state.get("sources_gathered", [])
     linkedin_profiles = state.get("linkedin_profiles", [])
 
@@ -322,25 +319,25 @@ def finalize_summary(state):
     # Join the deduplicated sources
     all_sources = "\n".join(unique_sources)
     
-    final_summary = f"## Summary\n\n{running_summary}\n\n### Sources:\n{all_sources}"
+    final_summary = f"## Lead List\n\n{running_summary}\n\n### Sources:\n{all_sources}"
     
     if linkedin_section:
         final_summary += linkedin_section
         
     return {"running_summary": final_summary}
 
-def route_research(state, config: RunnableConfig) -> Literal["finalize_summary", "web_research"]:
-    """LangGraph routing function that determines the next step in the research flow.
+def route_research(state, config: RunnableConfig) -> Literal["finalize_leads", "web_research"]:
+    """LangGraph routing function that determines the next step in the lead generation flow.
     
-    Controls the research loop by deciding whether to continue gathering information
-    or to finalize the summary based on the configured maximum number of research loops.
+    Controls the lead search loop by deciding whether to continue gathering information
+    or to finalize the lead list based on the configured maximum number of research loops.
     
     Args:
         state: Current graph state containing the research loop count
         config: Configuration for the runnable, including max_web_research_loops setting
         
     Returns:
-        String literal indicating the next node to visit ("web_research" or "finalize_summary")
+        String literal indicating the next node to visit ("web_research" or "finalize_leads")
     """
 
     configurable = Configuration.from_runnable_config(config)
@@ -348,23 +345,23 @@ def route_research(state, config: RunnableConfig) -> Literal["finalize_summary",
     if research_loop_count <= configurable.max_web_research_loops:
         return "web_research"
     else:
-        return "finalize_summary"
+        return "finalize_leads"
 
 # Add nodes and edges
 builder = StateGraph(SummaryState, input=SummaryStateInput, output=SummaryStateOutput, config_schema=Configuration)
 builder.add_node("generate_query", generate_query)
 builder.add_node("web_research", web_research)
-builder.add_node("summarize_sources", summarize_sources)
-builder.add_node("reflect_on_summary", reflect_on_summary)
-builder.add_node("finalize_summary", finalize_summary)
+builder.add_node("summarize_leads", summarize_leads)
+builder.add_node("reflect_on_leads", reflect_on_leads)
+builder.add_node("finalize_leads", finalize_leads)
 
 # Add edges
 builder.add_edge(START, "generate_query")
 builder.add_edge("generate_query", "web_research")
-builder.add_edge("web_research", "summarize_sources")
-builder.add_edge("summarize_sources", "reflect_on_summary")
-builder.add_conditional_edges("reflect_on_summary", route_research)
-builder.add_edge("finalize_summary", END)
+builder.add_edge("web_research", "summarize_leads")
+builder.add_edge("summarize_leads", "reflect_on_leads")
+builder.add_conditional_edges("reflect_on_leads", route_research)
+builder.add_edge("finalize_leads", END)
 
 graph = builder.compile()
 
@@ -374,7 +371,7 @@ if __name__ == "__main__":
         from langgraph.app import server
         
         # Register the graph with a name
-        server.add_graph("deep_researcher", graph)
+        server.add_graph("lead_generator", graph)
         
         # Enable LangSmith tracing if environment variables are configured
         if os.getenv("LANGSMITH_API_KEY") and os.getenv("LANGSMITH_PROJECT"):
@@ -395,7 +392,7 @@ if __name__ == "__main__":
                 print("LangSmith tracing not configured. Set LANGSMITH_API_KEY and LANGSMITH_PROJECT to enable.")
             
             # Run the graph directly
-            run_graph(graph, "deep_researcher", port=8123)
+            run_graph(graph, "lead_generator", port=8123)
         except ImportError:
             print("Error: Could not find langgraph.app.server or langgraph.cli.run")
             print("Please check your langgraph version or try running: langgraph run")
