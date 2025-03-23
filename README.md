@@ -1,13 +1,13 @@
-# Deep Research Agent with LinkedIn Access
+# Lead Generation Agent with LinkedIn Access
 
-A powerful research agent that can access LinkedIn profiles during research tasks. It combines web search capabilities with the ability to retrieve enriched LinkedIn profile data through Clay.
+A powerful lead generation agent that can access LinkedIn profiles to identify and enrich potential leads. It combines web search capabilities with LinkedIn profile data retrieval through Clay.
 
 ## Features
 
-- Deep web research on any topic
-- LinkedIn profile access via Clay API
-- Automatic summarization and knowledge gap identification
-- Well-structured output with citations
+- Automated lead generation based on your specific criteria
+- LinkedIn profile access and enrichment via Clay API
+- Structured lead information with contact details when available
+- Automatic identification of gaps in lead coverage
 
 ## Quick Start
 
@@ -37,27 +37,35 @@ A powerful research agent that can access LinkedIn profiles during research task
    CALLBACK_URL=https://your-ngrok-url.ngrok.io/webhook/clay-callback
    ```
 
-6. Run the agent:
+6. Run the lead generation agent:
    ```
-   python -m deepresearch.run "Your research topic"
+   python -m deepresearch.run "startup CTOs in fintech"
    ```
 
 ## How It Works
 
-1. **Search Query Generation**: The agent generates an optimized search query based on your research topic.
-2. **Web Research**: It searches the web for relevant information using Tavily.
-3. **LinkedIn Detection**: If LinkedIn profile URLs are found in the search results, they are automatically sent to Clay for enrichment.
-4. **Data Enrichment**: Clay processes the LinkedIn profiles and returns detailed data.
-5. **Summarization**: All gathered information is summarized into a comprehensive research report.
-6. **Knowledge Gap Analysis**: The agent identifies areas for further research and performs additional searches.
+1. **Query Generation**: The agent creates an optimized search query based on your lead criteria.
+2. **Web Search**: It searches the web for potential leads matching your criteria using Tavily.
+3. **LinkedIn Detection**: When LinkedIn profile URLs are found, they're sent to Clay for enrichment.
+4. **Lead Compilation**: The agent compiles all information into a structured lead list.
+5. **Gap Analysis**: The agent identifies missing lead types and performs additional searches.
+
+## Example Lead Criteria
+
+The agent works best with specific lead criteria such as:
+
+- "VP of Engineering at Series B startups in healthcare"
+- "Marketing Directors at Fortune 500 companies"
+- "Founders of AI startups in Europe"
+- "Product Managers with fintech experience in New York"
 
 ## LinkedIn Integration
 
-The agent can:
-- Detect LinkedIn profile URLs in search results
-- Send profiles to Clay for enrichment
-- Receive and store the enriched profile data
-- Incorporate profile information into the research summary
+The agent:
+- Detects LinkedIn profile URLs in search results
+- Sends profiles to Clay for enrichment
+- Receives detailed profile data including current role, company, skills
+- Incorporates profile information into the lead list
 
 LinkedIn profile data is stored in the `linkedin_profiles` directory for future reference.
 
@@ -72,12 +80,8 @@ python example.py
 This will:
 1. Start the LinkedIn service
 2. Guide you through setting up ngrok
-3. Let you enter a research topic
-4. Run the research agent and show the results
-
-## Detailed Setup
-
-For detailed setup instructions, see [SETUP.md](SETUP.md).
+3. Let you enter lead criteria
+4. Run the lead generation agent and show the results
 
 ## Configuration
 
@@ -87,11 +91,8 @@ You can configure the agent through environment variables:
 - `TAVILY_API_KEY`: Your Tavily API key for web search
 - `CLAY_WEBHOOK_URL`: Your Clay webhook URL
 - `CALLBACK_URL`: Your ngrok URL for receiving data from Clay
-- `LANGSMITH_API_KEY` (optional): For LangSmith tracing
 
 ## Command Line Options
-
-The agent supports several command line options:
 
 ```
 python -m deepresearch.run --help
@@ -100,4 +101,8 @@ python -m deepresearch.run --help
 Options include:
 - `--linkedin-service`: Start the LinkedIn service
 - `--port`: Specify the port for the LinkedIn service
-- `--max-loops`: Set the maximum number of research loops
+- `--max-loops`: Set the maximum number of search loops
+
+## Detailed Setup
+
+For detailed setup instructions, see [SETUP.md](SETUP.md).
