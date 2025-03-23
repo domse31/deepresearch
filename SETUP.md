@@ -1,6 +1,6 @@
-# Setup Guide for Deep Research Agent with LinkedIn Access
+# Setup Guide for Lead Generation Agent with LinkedIn Access
 
-This guide will walk you through setting up and using the Deep Research Agent with LinkedIn profile access capability.
+This guide will walk you through setting up and using the Lead Generation Agent with LinkedIn profile access capability.
 
 ## Prerequisites
 
@@ -57,26 +57,37 @@ The agent uses Clay to access LinkedIn profile data. Follow these steps to set u
 
 ## Usage
 
-### Running the Research Agent
+### Running the Lead Generation Agent
 
-Run the agent with a research topic:
-
-```bash
-python -m deepresearch.run "Your research topic here"
-```
-
-By default, the agent will perform 3 research loops. You can adjust this with the `--max-loops` parameter:
+Run the agent with your lead criteria:
 
 ```bash
-python -m deepresearch.run "Your research topic here" --max-loops 5
+python -m deepresearch.run "VP of Engineering at Series B startups"
 ```
+
+By default, the agent will perform 3 search loops. You can adjust this with the `--max-loops` parameter:
+
+```bash
+python -m deepresearch.run "Marketing Directors at Fortune 500 companies" --max-loops 5
+```
+
+### Example Lead Criteria
+
+Here are some examples of effective lead criteria:
+
+- "VP of Engineering at Series B startups in healthcare"
+- "Marketing Directors at Fortune 500 companies"
+- "Founders of AI startups in Europe"
+- "Product Managers with fintech experience in New York"
+- "CTOs of e-commerce companies with more than 50 employees"
+- "Sales leaders in cybersecurity SaaS companies"
 
 ### How the LinkedIn Integration Works
 
-1. The agent searches the web for information on your research topic
+1. The agent searches the web for leads matching your criteria
 2. When it finds LinkedIn profile URLs in the search results, it sends them to Clay for enrichment
 3. Clay processes the profiles and sends the enriched data back to your webhook endpoint
-4. The data is stored locally and used in subsequent research loops
+4. The data is stored locally and used in the lead generation process
 
 The profile data is saved in the `linkedin_profiles` directory with timestamps, so you can review it later.
 
@@ -97,3 +108,12 @@ If you get authentication errors:
 1. Verify that all API keys are correctly set in your `.env` file
 2. Check that your Clay webhook URL is correctly formatted
 3. Make sure your ngrok session is active and the tunnel is working
+
+### Lead Quality Issues
+
+If you're not getting quality leads:
+
+1. Try more specific criteria that include role, industry, and company size
+2. Use terms that would appear on LinkedIn profiles
+3. Increase the number of search loops with `--max-loops`
+4. Try running multiple searches with slightly different criteria
