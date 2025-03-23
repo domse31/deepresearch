@@ -1,5 +1,5 @@
 #!/bin/bash
-# Start both the LinkedIn service and ngrok in separate terminals
+# Start both the LinkedIn service and ngrok for lead generation
 
 # Create logs directory
 mkdir -p logs
@@ -12,7 +12,7 @@ if ! command -v ngrok &> /dev/null; then
 fi
 
 # Start the LinkedIn service
-echo "Starting LinkedIn service..."
+echo "Starting LinkedIn service for lead generation..."
 python -m deepresearch.run --linkedin-service > logs/linkedin_service.log 2>&1 &
 LINKEDIN_PID=$!
 echo "LinkedIn service started with PID $LINKEDIN_PID"
@@ -39,12 +39,15 @@ fi
 
 echo ""
 echo "==================================================="
-echo "LinkedIn service is running!"
+echo "Lead Generation service is running!"
 echo "ngrok URL: $NGROK_URL"
 echo "==================================================="
 echo ""
-echo "To use this URL in your research, add this to your .env file:"
+echo "To use this URL in your lead generation, add this to your .env file:"
 echo "CALLBACK_URL=$NGROK_URL/webhook/clay-callback"
+echo ""
+echo "Example command to generate leads:"
+echo "python -m deepresearch.run \"VP of Engineering at Series B startups\""
 echo ""
 echo "Press Ctrl+C to stop the services"
 
